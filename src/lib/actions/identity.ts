@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function startIdentityVerification(): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient();
@@ -13,6 +13,7 @@ export async function startIdentityVerification(): Promise<{ url?: string; error
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   try {
+    const stripe = getStripe();
     const session = await stripe.identity.verificationSessions.create({
       type: "document",
       metadata: { user_id: user.id },
