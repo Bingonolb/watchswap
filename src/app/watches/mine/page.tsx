@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { CONDITION_LABELS, type Watch } from "@/lib/types";
@@ -6,64 +7,47 @@ import { WatchStatusControls } from "@/components/WatchStatusControls";
 
 export default async function MyWatchesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: watches } = await supabase
-    .from("watches")
-    .select("*")
-    .eq("owner_id", user!.id)
-    .order("created_at", { ascending: false });
+    .from("watches").select("*").eq("owner_id", user!.id).order("created_at", { ascending: false });
 
   const list = (watches ?? []) as unknown as Watch[];
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div style={{ minHeight: "100dvh", background: "#08080a" }}>
       <Navbar />
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Mes montres</h1>
-          <Link
-            href="/watches/new"
-            className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
-          >
-            + Ajouter
+      <main style={{ maxWidth: 560, margin: "0 auto", padding: "24px 16px 100px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", color: "#f5f3ee" }}>Mes montres</h1>
+          <Link href="/watches/new" style={{ display: "flex", alignItems: "center", gap: 6, background: "#c9a84c", color: "#08080a", fontWeight: 700, borderRadius: 50, padding: "10px 18px", textDecoration: "none", fontSize: 13 }}>
+            <Plus size={14} /> Ajouter
           </Link>
         </div>
 
         {list.length === 0 ? (
-          <p className="rounded-2xl bg-white p-8 text-center text-neutral-500 shadow-sm">
-            Tu n&apos;as pas encore ajouté de montre.
-          </p>
+          <div style={{ borderRadius: 20, background: "#111116", border: "1px solid rgba(255,255,255,0.07)", padding: "48px 24px", textAlign: "center" }}>
+            <p style={{ fontSize: 15, color: "#6b6b78" }}>Tu n&apos;as pas encore ajouté de montre.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((w) => (
-              <div key={w.id} className="overflow-hidden rounded-2xl bg-white shadow-sm">
-                <div className="relative h-48 w-full bg-neutral-100">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {list.map(w => (
+              <div key={w.id} style={{ display: "flex", gap: 14, background: "#111116", borderRadius: 18, border: "1px solid rgba(255,255,255,0.07)", overflow: "hidden" }}>
+                <div style={{ width: 96, height: 96, flexShrink: 0, position: "relative" }}>
                   {w.photos?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={w.photos[0]} alt={w.brand} className="h-full w-full object-cover" />
+                    <img src={w.photos[0]} alt={w.brand} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-neutral-400">
-                      Pas de photo
-                    </div>
+                    <div style={{ width: "100%", height: "100%", background: "#1a1a20", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#6b6b78" }}>Pas de photo</div>
                   )}
-                  <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
-                    {w.status === "available"
-                      ? "Disponible"
-                      : w.status === "paused"
-                      ? "En pause"
-                      : "Échangée"}
-                  </span>
+                  <div style={{ position: "absolute", top: 6, left: 6, background: w.status === "available" ? "rgba(34,197,94,0.9)" : "rgba(107,107,120,0.9)", borderRadius: 6, padding: "2px 7px", fontSize: 9, fontWeight: 700, color: "#fff" }}>
+                    {w.status === "available" ? "Dispo" : w.status === "paused" ? "Pause" : "Échangée"}
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold">
-                    {w.brand} {w.model}
-                  </h3>
-                  <p className="text-sm text-neutral-500">
-                    {w.year ? `${w.year} · ` : ""}
-                    {CONDITION_LABELS[w.condition]}
+                <div style={{ flex: 1, padding: "14px 14px 14px 0", minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "#f5f3ee", marginBottom: 2 }}>{w.brand} {w.model}</p>
+                  <p style={{ fontSize: 12, color: "#6b6b78", marginBottom: 10 }}>
+                    {w.year ? `${w.year} · ` : ""}{CONDITION_LABELS[w.condition]}
                   </p>
                   <WatchStatusControls watchId={w.id} status={w.status} />
                 </div>

@@ -1,129 +1,199 @@
 "use client";
 
-import { Info, MapPin, BadgeCheck, FileCheck, Package, Expand } from "lucide-react";
 import { useState } from "react";
+import { MapPin, BadgeCheck, FileCheck, Package, ChevronUp, ChevronDown, Shield, X } from "lucide-react";
 import type { Watch } from "@/lib/types";
 import { CONDITION_LABELS } from "@/lib/types";
-import { PhotoLightbox } from "@/components/PhotoLightbox";
 
-export function WatchCard({ watch }: { watch: Watch }) {
-  const [showInfo, setShowInfo] = useState(false);
+export function WatchCard({ watch, onSwipe }: { watch: Watch; onSwipe?: (dir: "like" | "pass") => void }) {
+  const [showProfile, setShowProfile] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
   const photos = watch.photos ?? [];
-  const photo = photos[photoIndex];
+  const photo = photos[photoIndex] ?? null;
+
+  function handleTap(e: React.MouseEvent<HTMLDivElement>) {
+    if (showProfile) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (photos.length > 1) {
+      if (x > rect.width * 0.6) setPhotoIndex(i => Math.min(i + 1, photos.length - 1));
+      else if (x < rect.width * 0.4) setPhotoIndex(i => Math.max(i - 1, 0));
+    }
+  }
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl bg-neutral-900 shadow-2xl">
+    <div
+      onClick={handleTap}
+      style={{
+        position: "relative",
+        height: "100%",
+        width: "100%",
+        borderRadius: 24,
+        overflow: "hidden",
+        background: "#111116",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
+        cursor: "pointer",
+        userSelect: "none",
+      }}
+    >
+      {/* Photo */}
       {photo ? (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLightboxOpen(true);
+        <img
+          src={photo}
+          alt={`${watch.brand} ${watch.model}`}
+          draggable={false}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+            pointerEvents: "none",
           }}
-          className="absolute inset-0 h-full w-full cursor-zoom-in"
-          aria-label="Agrandir la photo"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={photo}
-            alt={`${watch.brand} ${watch.model}`}
-            draggable={false}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </button>
+        />
       ) : (
-        <div className="flex h-full items-center justify-center bg-neutral-800 text-neutral-500">
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6b78", fontSize: 14 }}>
           Pas de photo
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
+      {/* Photo dots */}
       {photos.length > 1 && (
-        <div className="absolute left-0 right-0 top-3 flex gap-1.5 px-4">
+        <div style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", gap: 4, padding: "0 16px" }}>
           {photos.map((_, i) => (
-            <button
-              key={i}
-              onClick={(e) => {
-                e.stopPropagation();
-                setPhotoIndex(i);
-              }}
-              className={`h-1 flex-1 rounded-full transition-colors ${
-                i === photoIndex ? "bg-white" : "bg-white/30"
-              }`}
-            />
+            <div key={i} style={{
+              flex: 1, height: 3, borderRadius: 2,
+              background: i === photoIndex ? "#fff" : "rgba(255,255,255,0.3)",
+              transition: "background 0.2s",
+            }} />
           ))}
         </div>
       )}
 
-      {photos.length > 1 && (
-        <span className="absolute right-4 top-7 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[11px] text-white backdrop-blur">
-          <Expand size={10} /> {photoIndex + 1}/{photos.length}
-        </span>
-      )}
+      {/* Gradient overlay */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
 
-      <button
-        onClick={() => setShowInfo((s) => !s)}
-        className="absolute bottom-24 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur"
-      >
-        <Info size={18} />
-      </button>
+      {/* Bottom info */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 20px 24px", color: "#fff" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+              {watch.brand}
+            </p>
+            <p style={{ fontSize: 15, fontWeight: 500, color: "rgba(255,255,255,0.85)", marginTop: 2 }}>
+              {watch.model}{watch.year ? ` · ${watch.year}` : ""}
+            </p>
+            {(watch.city || watch.country) && (
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                <MapPin size={11} style={{ display: "inline" }} />
+                {[watch.city, watch.country].filter(Boolean).join(", ")}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={e => { e.stopPropagation(); setShowProfile(s => !s); }}
+            style={{
+              width: 40, height: 40, borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(10px)",
+              border: "none", color: "#fff", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <ChevronUp size={18} />
+          </button>
+        </div>
 
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-6 text-white">
-        <h2 className="text-2xl font-bold">
-          {watch.brand} {watch.model}
-        </h2>
-        <p className="mt-1 text-sm text-white/90">
-          {watch.year ? `${watch.year} · ` : ""}
-          {CONDITION_LABELS[watch.condition]}
-        </p>
-        {(watch.city || watch.country) && (
-          <p className="mt-1 flex items-center gap-1 text-xs text-white/70">
-            <MapPin size={12} />
-            {[watch.city, watch.country].filter(Boolean).join(", ")}
-          </p>
-        )}
         {watch.purchase_price && (
-          <p className="mt-2 text-lg font-bold">
+          <p style={{ fontSize: 18, fontWeight: 700, color: "#c9a84c", marginTop: 8 }}>
             {new Intl.NumberFormat("fr-FR").format(watch.purchase_price)} {watch.currency}
           </p>
         )}
 
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
           {watch.has_proof_of_purchase && (
-            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
-              <FileCheck size={11} /> Preuve d&apos;achat
+            <span style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "4px 10px", fontSize: 11, color: "rgba(255,255,255,0.9)" }}>
+              <FileCheck size={10} /> Preuve d&apos;achat
             </span>
           )}
           {watch.has_certificate_authenticity && (
-            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
-              <BadgeCheck size={11} /> Certificat d&apos;authenticité
+            <span style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "4px 10px", fontSize: 11, color: "rgba(255,255,255,0.9)" }}>
+              <BadgeCheck size={10} /> Certificat
             </span>
           )}
           {(watch.has_box || watch.has_papers) && (
-            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
-              <Package size={11} />
-              {watch.has_box && watch.has_papers ? "Full set" : watch.has_box ? "Boîte" : "Papiers"}
+            <span style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "4px 10px", fontSize: 11, color: "rgba(255,255,255,0.9)" }}>
+              <Package size={10} /> {watch.has_box && watch.has_papers ? "Full set" : watch.has_box ? "Boîte" : "Papiers"}
             </span>
           )}
+          <span style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: 20, padding: "4px 10px", fontSize: 11, color: "rgba(255,255,255,0.9)" }}>
+            {CONDITION_LABELS[watch.condition]}
+          </span>
         </div>
-
-        {showInfo && watch.description && (
-          <p className="pointer-events-auto mt-3 rounded-xl bg-black/40 p-3 text-sm text-white/90">
-            {watch.description}
-          </p>
-        )}
       </div>
 
-      {lightboxOpen && photos.length > 0 && (
-        <PhotoLightbox
-          photos={photos}
-          index={photoIndex}
-          alt={`${watch.brand} ${watch.model}`}
-          onClose={() => setLightboxOpen(false)}
-          onIndexChange={setPhotoIndex}
-        />
+      {/* Profile sheet (slides up) */}
+      {showProfile && (
+        <div
+          onClick={e => e.stopPropagation()}
+          className="animate-slide-up"
+          style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            background: "rgba(12,12,16,0.97)",
+            backdropFilter: "blur(30px)",
+            borderRadius: "20px 20px 0 0",
+            padding: "20px 20px 32px",
+            color: "#f5f3ee",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <p style={{ fontSize: 18, fontWeight: 700 }}>{watch.brand} {watch.model}</p>
+            <button onClick={() => setShowProfile(false)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff" }}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            {[
+              ["Marque", watch.brand],
+              ["Modèle", watch.model],
+              ["Année", watch.year?.toString() ?? "—"],
+              ["État", CONDITION_LABELS[watch.condition]],
+              watch.purchase_price ? ["Valeur", `${new Intl.NumberFormat("fr-FR").format(watch.purchase_price)} ${watch.currency}`] : null,
+              (watch.city || watch.country) ? ["Lieu", [watch.city, watch.country].filter(Boolean).join(", ")] : null,
+            ].filter(Boolean).map(([label, value]) => (
+              <div key={label as string} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, color: "#6b6b78", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
+                <p style={{ fontSize: 13, fontWeight: 600 }}>{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {watch.description && (
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.6, marginBottom: 16 }}>{watch.description}</p>
+          )}
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={() => { setShowProfile(false); onSwipe?.("pass"); }}
+              style={{ flex: 1, padding: "13px", borderRadius: 50, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+            >
+              Passer
+            </button>
+            <button
+              onClick={() => { setShowProfile(false); onSwipe?.("like"); }}
+              style={{ flex: 1, padding: "13px", borderRadius: 50, border: "none", background: "#c9a84c", color: "#08080a", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+            >
+              Proposer un échange
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

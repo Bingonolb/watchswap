@@ -4,95 +4,84 @@ import { useActionState } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
 
+const inputStyle = {
+  width: "100%",
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.04)",
+  color: "#f5f3ee",
+  padding: "11px 14px",
+  fontSize: 13,
+  outline: "none",
+  transition: "border-color 0.15s",
+  boxSizing: "border-box" as const,
+};
+
+const labelStyle = {
+  display: "block",
+  fontSize: 11,
+  fontWeight: 600,
+  color: "#6b6b78",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.05em",
+  marginBottom: 6,
+};
+
 export function ProfileForm({ profile, email }: { profile: Profile | null; email: string }) {
   const [state, formAction, pending] = useActionState(updateProfile, undefined);
 
   return (
-    <form action={formAction} className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-neutral-700">Nom complet</label>
-          <input
-            name="full_name"
-            defaultValue={profile?.full_name ?? ""}
-            placeholder="Alexandre Martin"
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
-          />
+    <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={labelStyle}>Nom complet</label>
+          <input name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alexandre Martin" style={inputStyle} />
         </div>
-
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-neutral-700">Ville</label>
-          <input
-            name="city"
-            defaultValue={profile?.city ?? ""}
-            placeholder="Paris"
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
-          />
+          <label style={labelStyle}>Ville</label>
+          <input name="city" defaultValue={profile?.city ?? ""} placeholder="Paris" style={inputStyle} />
         </div>
-
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-neutral-700">Pays</label>
-          <input
-            name="country"
-            defaultValue={profile?.country ?? ""}
-            placeholder="France"
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
-          />
+          <label style={labelStyle}>Pays</label>
+          <input name="country" defaultValue={profile?.country ?? ""} placeholder="France" style={inputStyle} />
         </div>
-
-        <div className="col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-neutral-700">Bio</label>
-          <textarea
-            name="bio"
-            rows={3}
-            defaultValue={profile?.bio ?? ""}
-            placeholder="Collectionneur passionné depuis 10 ans, spécialisé Rolex et AP..."
-            className="w-full resize-none rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-sm outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
-          />
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={labelStyle}>Bio</label>
+          <textarea name="bio" rows={3} defaultValue={profile?.bio ?? ""} placeholder="Collectionneur depuis 10 ans, spécialisé Rolex et AP..." style={{ ...inputStyle, resize: "none" }} />
         </div>
-
-        <div className="col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-neutral-700">
-            Photo de profil
-          </label>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100">
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={labelStyle}>Photo de profil</label>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, overflow: "hidden", background: "#1a1a20", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {profile?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <span className="text-sm font-bold uppercase text-neutral-400">
-                  {profile?.username?.[0] ?? "?"}
-                </span>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#c9a84c" }}>{profile?.username?.[0]?.toUpperCase() ?? "?"}</span>
               )}
             </div>
-            <input
-              name="avatar"
-              type="file"
-              accept="image/*"
-              className="flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-500 file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white"
-            />
+            <input name="avatar" type="file" accept="image/*" style={{ flex: 1, fontSize: 12, color: "#6b6b78" }} />
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-500">
-        Email : <span className="font-medium text-neutral-700">{email}</span>
+      <div style={{ fontSize: 12, color: "#6b6b78", padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 10 }}>
+        Email : <span style={{ color: "#f5f3ee", fontWeight: 500 }}>{email}</span>
       </div>
 
       {state?.error && (
-        <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{state.error}</p>
+        <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px" }}>{state.error}</p>
       )}
       {state?.success && (
-        <p className="rounded-xl bg-green-50 px-4 py-2.5 text-sm text-green-700">Profil mis à jour ✓</p>
+        <p style={{ fontSize: 13, color: "#22c55e", background: "rgba(34,197,94,0.1)", borderRadius: 10, padding: "10px 14px" }}>Profil mis à jour ✓</p>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-brand py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark disabled:opacity-60"
+        style={{ width: "100%", borderRadius: 50, background: "#c9a84c", color: "#08080a", fontWeight: 700, fontSize: 14, padding: "13px", border: "none", cursor: "pointer", transition: "opacity 0.15s", opacity: pending ? 0.6 : 1 }}
       >
-        {pending ? "Enregistrement…" : "Enregistrer les modifications"}
+        {pending ? "Enregistrement…" : "Enregistrer"}
       </button>
     </form>
   );

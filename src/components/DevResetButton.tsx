@@ -21,9 +21,18 @@ export function DevResetButton() {
       onClick={handleReset}
       disabled={pending}
       title="Reset tous les swipes (mode test)"
-      className="fixed bottom-24 right-5 z-50 flex items-center gap-2 rounded-full bg-neutral-800/90 px-4 py-2.5 text-xs font-semibold text-white shadow-xl backdrop-blur transition hover:bg-neutral-700 disabled:opacity-60 md:bottom-6"
+      style={{
+        position: "fixed", bottom: 88, right: 16, zIndex: 50,
+        display: "flex", alignItems: "center", gap: 6,
+        background: "rgba(26,26,32,0.95)", backdropFilter: "blur(12px)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: 50, padding: "8px 14px",
+        fontSize: 11, fontWeight: 600, color: "#6b6b78",
+        cursor: "pointer", boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+        transition: "all 0.15s",
+      }}
     >
-      <RotateCcw size={13} className={pending ? "animate-spin" : ""} />
+      <RotateCcw size={11} style={{ animation: pending ? "spin 1s linear infinite" : "none" }} />
       {pending ? "Reset…" : "Reset swipes"}
     </button>
   );
