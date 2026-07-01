@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { SwipeDeck } from "@/components/SwipeDeck";
 import { FiltersSidebar } from "@/components/FiltersSidebar";
 import { MatchesSidebar } from "@/components/MatchesSidebar";
+import { DevResetButton } from "@/components/DevResetButton";
 import { createClient } from "@/lib/supabase/server";
 import type { Watch } from "@/lib/types";
 
@@ -56,6 +57,7 @@ export default async function DiscoverPage({
           <MatchesSidebar userId={user!.id} />
         </aside>
       </main>
+      <DevResetButton />
     </div>
   );
 }

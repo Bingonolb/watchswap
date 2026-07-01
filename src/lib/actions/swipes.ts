@@ -68,6 +68,16 @@ export async function fetchMoreWatches(
   return { watches: (data ?? []) as Watch[] };
 }
 
+export async function resetAllSwipes() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tu dois être connecté." };
+  await supabase.from("swipes").delete().eq("swiper_id", user.id);
+  return { success: true };
+}
+
 export async function undoLastSwipe(targetWatchId: string) {
   const supabase = await createClient();
   const {
