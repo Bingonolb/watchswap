@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Send, Smile } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/lib/actions/messages";
 import type { Message } from "@/lib/types";
@@ -88,7 +88,8 @@ export function ChatWindow({
         </Link>
         <div className="h-10 w-10 overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-200">
           {otherAvatarUrl && (
-            <Image src={otherAvatarUrl} alt={otherUsername} width={40} height={40} className="h-full w-full object-cover" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={otherAvatarUrl} alt={otherUsername} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           )}
         </div>
         <div>
